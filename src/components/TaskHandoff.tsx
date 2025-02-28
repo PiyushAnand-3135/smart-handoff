@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Users, CheckCircle, AlertCircle, Clock, ArrowRightCircle, Plus } from 'lucide-react';
-
+import ProjectDescription from './ProjectDescription';
 interface Task {
   id: number;
   title: string;
@@ -311,10 +311,11 @@ const TaskHandoff: React.FC = () => {
                   
                   <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-4 mb-6">
                     <h4 className="font-medium text-indigo-700 mb-2">AI Recommendation</h4>
-                    <p className="text-sm text-indigo-600">
+                    <p className="text-sm text-indigo-600 hidden">
                       Based on task dependencies and team availability, we recommend handing off to the EMEA Design team.
                       Their timezone (UTC+1) provides optimal coverage for this task.
                     </p>
+                    <ProjectDescription />
                   </div>
                   
                   <div className="mb-6">
