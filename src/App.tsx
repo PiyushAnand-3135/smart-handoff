@@ -17,7 +17,7 @@ function App() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <ArrowRightCircle className="h-8 w-8 text-indigo-600" />
-                <h1 className="text-2xl font-bold text-gray-800">Smart Handoff</h1>
+                <h1 className="text-2xl font-bold text-gray-800">Project Hub</h1>
               </div>
               <nav className="hidden md:block">
                 <ul className="flex space-x-8">
