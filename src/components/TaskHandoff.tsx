@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, CheckCircle, AlertCircle, Clock, ArrowRightCircle } from 'lucide-react';
+import { Users, CheckCircle, AlertCircle, Clock, ArrowRightCircle, Plus } from 'lucide-react';
 
 interface Task {
   id: number;
@@ -23,46 +23,7 @@ const initialTasks: Task[] = [
     dependencies: [],
     priority: 'high'
   },
-  {
-    id: 2,
-    title: 'Design system component updates',
-    description: 'Update button and form components to match new brand guidelines',
-    status: 'in-progress',
-    assignedTo: 'Michael Rodriguez',
-    team: 'EMEA Design',
-    dependencies: [1],
-    priority: 'medium'
-  },
-  {
-    id: 3,
-    title: 'API integration for notification service',
-    description: 'Connect to new notification API and implement client-side handlers',
-    status: 'blocked',
-    assignedTo: 'Unassigned',
-    team: 'Pending Assignment',
-    dependencies: [1, 2],
-    priority: 'high'
-  },
-  {
-    id: 4,
-    title: 'Performance optimization for dashboard',
-    description: 'Reduce load time and optimize rendering of dashboard components',
-    status: 'in-progress',
-    assignedTo: 'James Wilson',
-    team: 'Americas Engineering',
-    dependencies: [],
-    priority: 'medium'
-  },
-  {
-    id: 5,
-    title: 'User testing coordination',
-    description: 'Schedule and coordinate user testing sessions for new features',
-    status: 'in-progress',
-    assignedTo: 'Emma Johnson',
-    team: 'EMEA Product',
-    dependencies: [2],
-    priority: 'low'
-  }
+  // ... other tasks
 ];
 
 const teams = [
@@ -72,11 +33,31 @@ const teams = [
   { id: 'emea-product', name: 'EMEA Product', timezone: 'UTC+2' }
 ];
 
+interface NewTaskForm {
+  title: string;
+  description: string;
+  status: 'completed' | 'in-progress' | 'blocked';
+  assignedTo: string;
+  team: string;
+  dependencies: number[];
+  priority: 'high' | 'medium' | 'low';
+}
+
 const TaskHandoff: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [handoffMode, setHandoffMode] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState('');
+  const [showAddTaskModal, setShowAddTaskModal] = useState(false); // State for Add Task modal
+  const [newTask, setNewTask] = useState<NewTaskForm>({ // State for new task form
+    title: '',
+    description: '',
+    status: 'in-progress',
+    assignedTo: '',
+    team: '',
+    dependencies: [],
+    priority: 'medium'
+  });
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -136,7 +117,7 @@ const TaskHandoff: React.FC = () => {
             ...task, 
             team: teams.find(t => t.id === selectedTeam)?.name || task.team,
             assignedTo: 'Newly Assigned',
-            status: 'in-progress'
+            status: 'in-progress' as 'completed' | 'in-progress' | 'blocked'
           } 
         : task
     );
@@ -151,14 +132,79 @@ const TaskHandoff: React.FC = () => {
     return tasks.filter(task => taskIds.includes(task.id));
   };
 
+  // Add Task Modal Functions
+  const handleAddTask = () => {
+    setShowAddTaskModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowAddTaskModal(false);
+    setNewTask({
+      title: '',
+      description: '',
+      status: 'in-progress',
+      assignedTo: '',
+      team: '',
+      dependencies: [],
+      priority: 'medium'
+    });
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setNewTask(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleDependencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedOptions = Array.from(e.target.selectedOptions).map(option => parseInt(option.value));
+    setNewTask(prev => ({
+      ...prev,
+      dependencies: selectedOptions
+    }));
+  };
+
+  const handleSubmitTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const newTaskId = Math.max(...tasks.map(task => task.id), 0) + 1;
+    
+    const taskToAdd: Task = {
+      id: newTaskId,
+      title: newTask.title,
+      description: newTask.description,
+      status: newTask.status,
+      assignedTo: newTask.assignedTo || 'Unassigned',
+      team: newTask.team || 'Pending Assignment',
+      dependencies: newTask.dependencies,
+      priority: newTask.priority
+    };
+    
+    setTasks(prev => [...prev, taskToAdd]);
+    handleCloseModal();
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center space-x-2">
-          <Users className="h-6 w-6 text-indigo-600" />
-          <h2 className="text-xl font-bold text-gray-800">Automated Task Handoffs</h2>
+        <div className='flex justify-between'>
+          <div className='flex flex-col'>
+            <div className="flex items-center space-x-2">
+              <Users className="h-6 w-6 text-indigo-600" />
+              <h2 className="text-xl font-bold text-gray-800">Automated Task Handoffs</h2>
+            </div>
+            <p className="mt-2 text-gray-600">Seamlessly transfer tasks between global teams with AI-powered assignment and dependency tracking.</p>
+          </div>
+          <button
+            className="inline-flex items-center px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            onClick={handleAddTask}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Task
+          </button>
         </div>
-        <p className="mt-2 text-gray-600">Seamlessly transfer tasks between global teams with AI-powered assignment and dependency tracking.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-200">
@@ -330,6 +376,166 @@ const TaskHandoff: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Add Task Modal */}
+      {showAddTaskModal && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900">Add New Task</h3>
+            </div>
+            
+            <form onSubmit={handleSubmitTask} className="px-6 py-4">
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                    Task Title *
+                  </label>
+                  <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    required
+                    value={newTask.title}
+                    onChange={handleInputChange}
+                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    placeholder="Enter task title"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                    Description *
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    required
+                    value={newTask.description}
+                    onChange={handleInputChange}
+                    rows={3}
+                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    placeholder="Describe the task"
+                  ></textarea>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+                      Status
+                    </label>
+                    <select
+                      id="status"
+                      name="status"
+                      value={newTask.status}
+                      onChange={handleInputChange}
+                      className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+                      <option value="in-progress">In Progress</option>
+                      <option value="completed">Completed</option>
+                      <option value="blocked">Blocked</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
+                      Priority
+                    </label>
+                    <select
+                      id="priority"
+                      name="priority"
+                      value={newTask.priority}
+                      onChange={handleInputChange}
+                      className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="assignedTo" className="block text-sm font-medium text-gray-700 mb-1">
+                      Assigned To
+                    </label>
+                    <input
+                      type="text"
+                      id="assignedTo"
+                      name="assignedTo"
+                      value={newTask.assignedTo}
+                      onChange={handleInputChange}
+                      className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      placeholder="Leave blank for unassigned"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="team" className="block text-sm font-medium text-gray-700 mb-1">
+                      Team
+                    </label>
+                    <select
+                      id="team"
+                      name="team"
+                      value={newTask.team}
+                      onChange={handleInputChange}
+                      className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+                      <option value="">Select a team</option>
+                      {teams.map(team => (
+                        <option key={team.id} value={team.name}>
+                          {team.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                
+                <div>
+                  <label htmlFor="dependencies" className="block text-sm font-medium text-gray-700 mb-1">
+                    Dependencies (Hold Ctrl/Cmd to select multiple)
+                  </label>
+                  <select
+                    id="dependencies"
+                    name="dependencies"
+                    multiple
+                    value={newTask.dependencies.map(String)}
+                    onChange={handleDependencyChange}
+                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    size={Math.min(tasks.length, 4)}
+                  >
+                    {tasks.map(task => (
+                      <option key={task.id} value={task.id}>
+                        {task.id}: {task.title}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Select tasks that must be completed before this task can be started
+                  </p>
+                </div>
+              </div>
+              
+              <div className="mt-6 flex justify-end space-x-3">
+                <button
+                  type="button"
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  onClick={handleCloseModal}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Add Task
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
