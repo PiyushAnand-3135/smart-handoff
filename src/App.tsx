@@ -3,7 +3,7 @@ import { Clock, Users, FileText, ArrowRightCircle } from 'lucide-react';
 import TaskHandoff from './components/TaskHandoff';
 import HandoffDocumentation from './components/HandoffDocumentation';
 import TimeZoneOverlap from './components/TimeZoneOverlap';
-import CompanyDashboard from './components/ComapnyDashboard';
+import Progress from './components/Progress';
 import { TaskProvider } from './context/TaskContext';
 
 function App() {
@@ -50,10 +50,10 @@ function App() {
                   </li>
                   <li>
                     <button 
-                      className={`flex items-center space-x-1 ${activeTab === 'dashboard' ? 'text-indigo-600 font-medium' : 'text-gray-600 hover:text-indigo-600'}`}
-                      onClick={() => setActiveTab('dashboard')}
+                      className={`flex items-center space-x-1 ${activeTab === 'Progress' ? 'text-indigo-600 font-medium' : 'text-gray-600 hover:text-indigo-600'}`}
+                      onClick={() => setActiveTab('Progress')}
                     >
-                      <span>Dashboard</span>
+                      <span>Progress</span>
                     </button>
                   </li>
                 </ul>
@@ -67,7 +67,7 @@ function App() {
             {activeTab === 'taskHandoff' && <TaskHandoff />}
             {activeTab === 'documentation' && <HandoffDocumentation />}
             {activeTab === 'timeZone' && <TimeZoneOverlap />}
-            {activeTab === 'dashboard' && <CompanyDashboard />}
+            {activeTab === 'Progress' && <Progress />}
           </div>
         </main>
 
